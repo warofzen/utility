@@ -7,7 +7,7 @@
 alias e="$EDITOR"
 command -v nvim > /dev/null && alias ez='nvim +"Telescope oldfiles"' # Must have telescope plugin installed for neovim
 alias :q="exit" # vim user be like
-alias again="exec zsh" # source .zshrc but better
+alias res="exec zsh" # source .zshrc but better
 alias gist='gh gist'
 alias grep='grep --color=auto'
 
