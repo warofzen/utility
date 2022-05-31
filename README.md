@@ -1,5 +1,5 @@
 # zsh-utility
-Some usefuls utilities
+Some usefuls utilities and aliases
 
 Credits:
 - [zimfw/utility](https://github.com/zimfw/utility)
