@@ -10,6 +10,8 @@ alias :q="exit" # vim user be like
 alias res="exec zsh" # source .zshrc but better
 alias gist='gh gist'
 alias grep='grep --color=auto'
+alias ex='unarchive'
+alias open='xdg-open'
 
 # aliases for z.lua
 alias zz='z -I'
@@ -36,15 +38,6 @@ else
   alias lm='l -tr'
 fi
 
-# a get command, taken from zim's
-if (( ${+commands[aria2c]} )); then
-  alias get='aria2c --max-connection-per-server=5 --continue'
-elif (( ${+commands[axel]} )); then
-  alias get='axel --num-connections=5 --alternate'
-elif (( ${+commands[wget]} )); then
-  alias get='wget --continue --progress=bar --timestamping'
-fi
-
 # Safer rm command
 if (( ${+commands[trash-put]} )); then
   alias rm='trash-put'
@@ -56,51 +49,7 @@ fi
 # Functions
 # ---
 
-# taken from https://github.com/peterhurford/up.zsh
-function u(){
-  if [[ "$#" -ne 1 ]]; then
-    cd ..
-  elif ! [[ $1 =~ '^[0-9]+$' ]]; then
-    echo "Error: up should be called with the number of directories to go up. The default is 1."
-  else
-    local d=""
-    limit=$1
-    for ((i=1 ; i <= limit ; i++))
-      do
-        d=$d/..
-      done
-    d=$(echo $d | sed 's/^\///')
-    cd $d
-  fi
-}
-
-function ex() {
-  if [ -f $1 ]; then
-    case ${1} in
-      *.tar) tar -xf $1 ;;
-      *.tar.bz|*.tar.bz2|*.tbz|*.tbz2) tar -xjf $1 ;;
-      *.tar.gz|*.tgz) tar -xzf $1 ;;
-      *.tar.lzma|*.tlz) tar -xf $1 ;;
-      *.tar.xz|*.txz) tar -xJf $1 ;;
-      *.tar.zst|*.tzst) tar --use-compress-program=unzstd -xvf $1 ;;
-      *.bz|*.bz2) bunzip2 $1 ;;
-      *.gz) gunzip $1 ;;
-      *.lzma) unlzma -T0 $1 ;;
-      *.xz) unxz -T0 $1 ;;
-      *.zst) zstd -T0 -d $1 ;;
-      *.zip) unzip $1;;
-      *.rar) unrar x -ad $1 ;;
-      *.7z) 7z x $1 ;;
-      *.Z) uncompress $1 ;;
-      *) echo "'$1' cannot be extracted via ex" ;;
-    esac
-  else
-    echo "'$1' is not a valid file"
-  fi
-}
-
-# ohmyzsh's stuff
-function copypath {
+function cpwd() {
   # If no argument passed, use current directory
   local file="${1:-.}"
 
@@ -109,7 +58,7 @@ function copypath {
 
   # Copy the absolute path without resolving symlinks
   # If clipcopy fails, exit the function with an error
-  print -n "${file:a}" | pbcopy || return 1
+  print -n "${file:a}" | xclip -selection clipboard -in || return 1
 
   echo ${(%):-"%B${file:a}%b copied to clipboard."}
 }
@@ -199,19 +148,7 @@ function sudo-command-line() {
   }
 }
 
-function copybuffer () {
-  if which pbcopy &>/dev/null; then
-    printf "%s" "$BUFFER" | pbcopy
-  else
-    zle -M "pbcopy not found. Please make sure you have https://github.com/zpm-zsh/clipboard installed correctly."
-  fi
-}
-
 function symmetric-ctrl-z () {
-  local usage=(
-    "Use CTRL-z to bring background processes back to the foreground"
-  )
-  [[ $1 == "-h" ]] && printf "%s\n" $usage && return
   if [[ $#BUFFER -eq 0 ]]; then
     BUFFER="fg"
     zle accept-line -w
@@ -222,11 +159,9 @@ function symmetric-ctrl-z () {
 }
 
 zle -N sudo-command-line
-zle -N copybuffer
 zle -N symmetric-ctrl-z
 
 bindkey '\e\e' sudo-command-line
-bindkey "^O" copybuffer
 bindkey '^Z' symmetric-ctrl-z
 
 # vim:et sts=2 sw=2 ft=zsh
